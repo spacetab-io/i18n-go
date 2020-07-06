@@ -1,3 +1,3 @@
-module github.com/microparts/i18n-go
+module github.com/spacetab-io/i18n-go
 
 go 1.12
