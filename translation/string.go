@@ -196,3 +196,33 @@ func (o *String) String() string {
 
 	return string(data)
 }
+
+func (u *String) UnmarshalJSON(data []byte) error {
+	type Alias String
+	aux := &struct {
+		En string `json:"en"`
+		Ru string `json:"ru"`
+		*Alias
+	}{
+		Alias: (*Alias)(u),
+	}
+	
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	u.Translate = make(map[string]string)
+	if aux.En != "" {
+		u.Translate["en"] = aux.En
+	}
+
+	if aux.Ru != "" {
+		u.Translate["ru"] = aux.Ru
+	}
+
+	// Make default, or from context
+	u.Display = aux.Ru
+	u.Second = aux.En
+
+	return nil
+}
