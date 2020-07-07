@@ -1,6 +1,7 @@
 package translation
 
 import (
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 )
@@ -321,5 +322,73 @@ func TestString_String(t *testing.T) {
 
 	if str != expected {
 		t.Errorf("failed to stringify a translation string. Exist: %v, expected: %v", str, expected)
+	}
+}
+
+type UnmarshalTest struct {
+	Input  string
+	Output String
+}
+
+func TestString_UnmarshalJSON(t *testing.T) {
+	var (
+		err   error
+		tests = []UnmarshalTest{
+			{
+				Input: "{\"display\":\"disp\",\"second\":\"sec\",\"translate\":{\"ru\":\"рус\",\"en\":\"eng\"}}",
+				Output: String{
+					Display: "disp",
+					Second:  "sec",
+					Translate: map[string]string{
+						"ru": "рус",
+						"en": "eng",
+					},
+				},
+			},
+			{
+				Input: "{\"display\":\"\",\"second\":\"\",\"translate\":{\"ru\":\"рус\",\"en\":\"eng\"}}",
+				Output: String{
+					Display: "рус",
+					Second:  "eng",
+					Translate: map[string]string{
+						"ru": "рус",
+						"en": "eng",
+					},
+				},
+			},
+			{
+				Input: "{\"display\":\"disp\",\"second\":\"sec\",\"translate\":{}}",
+				Output: String{
+					Display: "disp",
+					Second:  "sec",
+					Translate: map[string]string{
+						"ru": "disp",
+						"en": "sec",
+					},
+				},
+			},
+			{
+				Input: `{"ru": "рус", "en": "eng"}`,
+				Output: String{
+					Display: "рус",
+					Second:  "eng",
+					Translate: map[string]string{
+						"ru": "рус",
+						"en": "eng",
+					},
+				},
+			},
+		}
+	)
+
+	for _, v := range tests {
+		res := String{}
+		err = res.UnmarshalJSON([]byte(v.Input))
+
+		if err != nil {
+			t.Error("Failed to marshal string")
+		}
+
+		assert.EqualValues(t, v.Output, res)
 	}
 }
