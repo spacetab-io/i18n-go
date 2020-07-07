@@ -352,6 +352,10 @@ func TestString_UnmarshalJSON(t *testing.T) {
 				Output: String{Display: "рус", Second: "eng", Translate: map[string]string{"ru": "рус", "en": "eng"}},
 			},
 			{
+				Input:  `{"ru": "", "en": ""}`,
+				Output: String{Display: "", Second: "", Translate: map[string]string{"ru": "", "en": ""}},
+			},
+			{
 				Input:   `"ru": "рус"`,
 				Output:  String{Display: "", Second: "", Translate: map[string]string(nil)},
 				isError: true,

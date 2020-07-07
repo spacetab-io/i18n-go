@@ -211,6 +211,10 @@ func (o *String) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	if o.Translate == nil {
+		o.Translate = map[string]string{}
+	}
+
 	if aux.Ru != "" || aux.En != "" {
 		o.Translate = make(map[string]string)
 		if aux.En != "" {
