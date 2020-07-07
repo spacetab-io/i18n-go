@@ -326,8 +326,9 @@ func TestString_String(t *testing.T) {
 }
 
 type UnmarshalTest struct {
-	Input  string
-	Output String
+	Input   string
+	Output  String
+	isError bool
 }
 
 func TestString_UnmarshalJSON(t *testing.T) {
@@ -335,48 +336,25 @@ func TestString_UnmarshalJSON(t *testing.T) {
 		err   error
 		tests = []UnmarshalTest{
 			{
-				Input: "{\"display\":\"disp\",\"second\":\"sec\",\"translate\":{\"ru\":\"рус\",\"en\":\"eng\"}}",
-				Output: String{
-					Display: "disp",
-					Second:  "sec",
-					Translate: map[string]string{
-						"ru": "рус",
-						"en": "eng",
-					},
-				},
+				Input:  `{"display":"disp","second":"sec","translate":{"ru":"рус","en":"eng"}}`,
+				Output: String{Display: "disp", Second: "sec", Translate: map[string]string{"ru": "рус", "en": "eng"}},
 			},
 			{
-				Input: "{\"display\":\"\",\"second\":\"\",\"translate\":{\"ru\":\"рус\",\"en\":\"eng\"}}",
-				Output: String{
-					Display: "рус",
-					Second:  "eng",
-					Translate: map[string]string{
-						"ru": "рус",
-						"en": "eng",
-					},
-				},
+				Input:  `{"display":"","second":"","translate":{"ru":"рус","en":"eng"}}`,
+				Output: String{Display: "рус", Second: "eng", Translate: map[string]string{"ru": "рус", "en": "eng"}},
 			},
 			{
-				Input: "{\"display\":\"disp\",\"second\":\"sec\",\"translate\":{}}",
-				Output: String{
-					Display: "disp",
-					Second:  "sec",
-					Translate: map[string]string{
-						"ru": "disp",
-						"en": "sec",
-					},
-				},
+				Input:  `{"display":"disp","second":"sec","translate":{}}`,
+				Output: String{Display: "disp", Second: "sec", Translate: map[string]string{"ru": "disp", "en": "sec"}},
 			},
 			{
-				Input: `{"ru": "рус", "en": "eng"}`,
-				Output: String{
-					Display: "рус",
-					Second:  "eng",
-					Translate: map[string]string{
-						"ru": "рус",
-						"en": "eng",
-					},
-				},
+				Input:  `{"ru": "рус", "en": "eng"}`,
+				Output: String{Display: "рус", Second: "eng", Translate: map[string]string{"ru": "рус", "en": "eng"}},
+			},
+			{
+				Input:   `"ru": "рус"`,
+				Output:  String{Display: "", Second: "", Translate: map[string]string(nil)},
+				isError: true,
 			},
 		}
 	)
@@ -384,9 +362,10 @@ func TestString_UnmarshalJSON(t *testing.T) {
 	for _, v := range tests {
 		res := String{}
 		err = res.UnmarshalJSON([]byte(v.Input))
-
-		if err != nil {
-			t.Error("Failed to marshal string")
+		if v.isError {
+			assert.Error(t, err)
+		} else if !assert.NoError(t, err) {
+			t.FailNow()
 		}
 
 		assert.EqualValues(t, v.Output, res)
