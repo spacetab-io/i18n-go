@@ -200,9 +200,11 @@ func (o *String) String() string {
 func (o *String) UnmarshalJSON(data []byte) error {
 	type Alias String
 	aux := struct {
+		*Alias
+		TranslateBuf struct{
 		En string `json:"en"`
 		Ru string `json:"ru"`
-		*Alias
+	} `json:"translate"`
 	}{
 		Alias: (*Alias)(o),
 	}
@@ -214,20 +216,19 @@ func (o *String) UnmarshalJSON(data []byte) error {
 	if o.Translate == nil {
 		o.Translate = map[string]string{}
 	}
-
-	if aux.Ru != "" || aux.En != "" {
+	if aux.TranslateBuf.Ru != "" || aux.TranslateBuf.En != "" {
 		o.Translate = make(map[string]string)
-		if aux.En != "" {
-			o.Translate["en"] = aux.En
+		if aux.TranslateBuf.En != "" {
+			o.Translate["en"] = aux.TranslateBuf.En
 		}
 
-		if aux.Ru != "" {
-			o.Translate["ru"] = aux.Ru
+		if aux.TranslateBuf.Ru != "" {
+			o.Translate["ru"] = aux.TranslateBuf.Ru
 		}
 
 		// Make default, or from context
-		o.Display = aux.Ru
-		o.Second = aux.En
+		o.Display = aux.TranslateBuf.Ru
+		o.Second = aux.TranslateBuf.En
 
 		return nil
 	}
@@ -255,6 +256,6 @@ func (o *String) UnmarshalJSON(data []byte) error {
 			o.Second = v
 		}
 	}
-
 	return nil
 }
+
