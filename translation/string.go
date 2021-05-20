@@ -37,7 +37,7 @@ func (o *String) Reset() {
 	o.ctxApplied = false
 }
 
-// TranslateBuf response with translation string contains ctxApplied as false.
+// A response with translation string contains ctxApplied as false.
 // Reset the ctxApplied will be useful in test to compare a response and an expected value.
 func (o *String) ResetCtxApplied() {
 	o.ctxApplied = false
