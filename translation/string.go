@@ -201,10 +201,12 @@ func (o *String) UnmarshalJSON(data []byte) error {
 	type Alias String
 	aux := struct {
 		*Alias
-		TranslateBuf struct{
-		En string `json:"en"`
-		Ru string `json:"ru"`
-	} `json:"translate"`
+		En           string `json:"en"`
+		Ru           string `json:"ru"`
+		TranslateBuf struct {
+			En string `json:"en"`
+			Ru string `json:"ru"`
+		} `json:"translate"`
 	}{
 		Alias: (*Alias)(o),
 	}
@@ -213,22 +215,37 @@ func (o *String) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	if len(aux.TranslateBuf.Ru) > 0 {
+		aux.Ru = aux.TranslateBuf.Ru
+	}
+	if len(aux.TranslateBuf.En) > 0 {
+		aux.En = aux.TranslateBuf.En
+	}
+
 	if o.Translate == nil {
 		o.Translate = map[string]string{}
 	}
-	if aux.TranslateBuf.Ru != "" || aux.TranslateBuf.En != "" {
-		o.Translate = make(map[string]string)
-		if aux.TranslateBuf.En != "" {
-			o.Translate["en"] = aux.TranslateBuf.En
+
+	if aux.Ru != "" || aux.En != "" {
+		if aux.En != "" {
+			o.Translate["en"] = aux.En
 		}
 
-		if aux.TranslateBuf.Ru != "" {
-			o.Translate["ru"] = aux.TranslateBuf.Ru
+		if aux.Ru != "" {
+			o.Translate["ru"] = aux.Ru
+		}
+
+		if len(aux.Display) == 0 {
+			aux.Display = aux.Ru
+		}
+
+		if len(aux.Second) == 0 {
+			aux.Second = aux.En
 		}
 
 		// Make default, or from context
-		o.Display = aux.TranslateBuf.Ru
-		o.Second = aux.TranslateBuf.En
+		o.Display = aux.Display
+		o.Second = aux.Second
 
 		return nil
 	}
@@ -237,11 +254,11 @@ func (o *String) UnmarshalJSON(data []byte) error {
 	o.Second = aux.Alias.Second
 	o.Translate = aux.Translate
 
-	if _, ok := o.Translate["ru"]; !ok {
+	if _, ok := o.Translate["ru"]; !ok && len(o.Display) > 0 {
 		o.Translate["ru"] = o.Display
 	}
 
-	if _, ok := o.Translate["en"]; !ok {
+	if _, ok := o.Translate["en"]; !ok && len(o.Display) > 0 {
 		o.Translate["en"] = o.Second
 	}
 
@@ -258,4 +275,3 @@ func (o *String) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
-

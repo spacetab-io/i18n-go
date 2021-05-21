@@ -344,6 +344,10 @@ func TestString_UnmarshalJSON(t *testing.T) {
 				Output: String{Display: "рус", Second: "eng", Translate: map[string]string{"ru": "рус", "en": "eng"}},
 			},
 			{
+				Input:  `{"translate":{}}`,
+				Output: String{Display: "", Second: "", Translate: map[string]string{}},
+			},
+			{
 				Input:  `{"display":"disp","second":"sec","translate":{}}`,
 				Output: String{Display: "disp", Second: "sec", Translate: map[string]string{"ru": "disp", "en": "sec"}},
 			},
@@ -353,7 +357,7 @@ func TestString_UnmarshalJSON(t *testing.T) {
 			},
 			{
 				Input:  `{"ru": "", "en": ""}`,
-				Output: String{Display: "", Second: "", Translate: map[string]string{"ru": "", "en": ""}},
+				Output: String{Display: "", Second: "", Translate: map[string]string{}},
 			},
 			{
 				Input:   `"ru": "рус"`,
